@@ -6,8 +6,12 @@ import com.sky.result.PageResult;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 public interface DishService {
     public void saveWithFlavor(DishDTO dishDTO);
 
     PageResult pageQuery(DishPageQueryDTO dishPageQueryDTO);
+
+    void deleteBetch(List<Long> ids);
 }

@@ -7,6 +7,7 @@ import com.aliyun.oss.OSSException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayInputStream;
 
 @Data
@@ -64,5 +65,19 @@ public class AliOssUtil {
         log.info("文件上传到:{}", stringBuilder.toString());
 
         return stringBuilder.toString();
+    }
+
+    public void deleteImg(String url) {
+//        // 填写文件完整路径。文件完整路径中不能包含Bucket名称。（这里根据自己的地址改）https://sky-take-out-studytest.oss-cn-chengdu.aliyuncs.com/320c936a-d58f-460c-aa18-8dd80cd1d7ef.jpg
+        url = url.replace("https://sky-take-out-studytest.oss-cn-chengdu.aliyuncs.com/", "");
+//        int index = url.indexOf("?");
+//        url = url.substring(0, index);
+//        System.out.println("拆分后的路径" + url);
+        // 创建OSSClient实例。
+        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+        // 删除文件或目录。如果要删除目录，目录必须为空。
+        ossClient.deleteObject(bucketName, url);
+        // 关闭OSSClient。
+        ossClient.shutdown();
     }
 }
