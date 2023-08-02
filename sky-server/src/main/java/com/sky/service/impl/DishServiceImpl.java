@@ -9,10 +9,9 @@ import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
 import com.sky.exception.DeletionNotAllowedException;
-import com.sky.mapper.CategoryMapper;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
-import com.sky.mapper.SetmealDIshMapper;
+import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.utils.AliOssUtil;
@@ -23,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,7 +34,7 @@ public class DishServiceImpl implements DishService {
     @Autowired
     private DishFlavorMapper dishFlavorMapper;
     @Autowired
-    private SetmealDIshMapper setmealDIshMapper;
+    private SetmealDishMapper setmealDIshMapper;
     @Autowired
     private AliOssUtil aliOssUtil;
 
@@ -102,16 +102,36 @@ public class DishServiceImpl implements DishService {
         BeanUtils.copyProperties(dishDTO, dish);
         Dish original = dishMapper.getById(dish.getId());
         dishMapper.update(dish);
-        if (dish.getImage().equals(original.getImage())){
+        if (dish.getImage() != null && !dish.getImage().equals(original.getImage())) {
             aliOssUtil.deleteImg(original.getImage());
         }
         dishFlavorMapper.deleteByDishId(dishDTO.getId());
-        List<DishFlavor> flavors=dishDTO.getFlavors();
+        List<DishFlavor> flavors = dishDTO.getFlavors();
         if (flavors != null && flavors.size() != 0) {
             for (DishFlavor dishFlavor : flavors) {
                 dishFlavor.setDishId(dishDTO.getId());
             }
             dishFlavorMapper.insertBatch(flavors);
         }
+    }
+
+    @Override
+    public List<DishVO> getByCategoryId(Long categoryId) {
+        List<Dish> dishs = dishMapper.getByCategoryId(categoryId);
+        List<DishVO> dishVOS = new ArrayList<>();
+        for (Dish dish : dishs) {
+            DishVO dishVO = new DishVO();
+            BeanUtils.copyProperties(dish, dishVO);
+            List<DishFlavor> dishFlavors = dishFlavorMapper.getByDishId(dish.getId());
+            dishVO.setFlavors(dishFlavors);
+            dishVOS.add(dishVO);
+        }
+        return dishVOS;
+    }
+
+    @Override
+    public void stopOrStart(Integer status, Long id) {
+        Dish dish = Dish.builder().status(status).id(id).build();
+        dishMapper.update(dish);
     }
 }
