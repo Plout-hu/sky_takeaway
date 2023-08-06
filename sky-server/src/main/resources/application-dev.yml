@@ -19,3 +19,7 @@ sky:
   wechat:
     appid: wx5ec27db29ff79e45
     secret: c08984b7836814c91d177d91af172c00
+  shop:
+    address: 重庆市县巫溪县沁园
+  amap:
+    key: 1289783c989115e40535c3ba5387e75d
