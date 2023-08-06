@@ -68,8 +68,8 @@ public class OrderServiceImpl implements OrderService {
         if (addressBook == null) {
             throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
         }
-        log.info("地址:{}",addressBook.getProvinceName()+addressBook.getCityName()+addressBook.getDistrictName()+addressBook.getDetail());
-        checkOutOfRange( addressBook.getProvinceName()+addressBook.getCityName()+addressBook.getDistrictName()+addressBook.getDetail());
+        log.info("地址:{}", addressBook.getProvinceName() + addressBook.getCityName() + addressBook.getDistrictName() + addressBook.getDetail());
+        checkOutOfRange(addressBook.getProvinceName() + addressBook.getCityName() + addressBook.getDistrictName() + addressBook.getDetail());
         Long userId = BaseContext.getCurrentId();
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setUserId(userId);
@@ -156,11 +156,11 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
-        Map map=new HashMap<>();
-        map.put("type",1);
-        map.put("orderId",ordersDB.getId());
-        map.put("content","订单号"+outTradeNo);
-        String json= JSON.toJSONString(map);
+        Map map = new HashMap<>();
+        map.put("type", 1);
+        map.put("orderId", ordersDB.getId());
+        map.put("content", "订单号" + outTradeNo);
+        String json = JSON.toJSONString(map);
         webSocketServer.sendToAllClient(json);
     }
 
@@ -345,6 +345,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public void reminder(Long id) {
+        Orders orders = orderMapper.getById(id);
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        Map map=new HashMap<>();
+        map.put("type",2);
+        map.put("orderId",id);
+        map.put("content","订单号:"+orders.getNumber());
+        String json = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
+    }
+
+    @Override
     public OrderStatisticsVO getStatistics() {
         Integer toBeConfirmed = orderMapper.countByStatus(Orders.TO_BE_CONFIRMED);
         Integer confirmed = orderMapper.countByStatus(Orders.CONFIRMED);
@@ -411,7 +425,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         //数据解析
-        JSONObject location = (JSONObject) ((JSONArray)jsonObject.get("geocodes")).get(0);
+        JSONObject location = (JSONObject) ((JSONArray) jsonObject.get("geocodes")).get(0);
 
 //        String lat = location.getString("lat");
 //        String lng = location.getString("lng");
@@ -428,7 +442,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         //数据解析
-        location = (JSONObject) ((JSONArray)jsonObject.get("geocodes")).get(0);
+        location = (JSONObject) ((JSONArray) jsonObject.get("geocodes")).get(0);
 //        lat = location.getString("lat");
 //        lng = location.getString("lng");
         //用户收货地址经纬度坐标
@@ -437,7 +451,7 @@ public class OrderServiceImpl implements OrderService {
         map.put("origin", shopLngLat);
         map.put("destination", userLngLat);
 //        map.put("steps_info","0");
-        map.put("city",address.substring(3));
+        map.put("city", address.substring(3));
         //路线规划
         String json = HttpClientUtil.doGet("https://restapi.amap.com/v3/direction/walking", map);
 
@@ -450,7 +464,7 @@ public class OrderServiceImpl implements OrderService {
 //        JSONObject result = jsonObject.getJSONObject("result");
         JSONObject routes = (JSONObject) jsonObject.get("route");
         JSONArray path = (JSONArray) routes.get("paths");
-        int distance =Integer.parseInt((String) ((JSONObject) path.get(0)).get("distance"));
+        int distance = Integer.parseInt((String) ((JSONObject) path.get(0)).get("distance"));
 //        Integer distance = (Integer) ((JSONObject) jsonArray.get(0)).get("distance");
 
         if (distance > 5000) {
