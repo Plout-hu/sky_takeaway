@@ -66,11 +66,17 @@ public class OrderController {
         orderService.repeat(id);
         return Result.success();
     }
-    @PutMapping("cancel/{id}")
+    @PutMapping("/cancel/{id}")
     @ApiOperation("取消订单")
     public Result cancel(@PathVariable Long id) throws Exception {
         log.info("取消订单:{}",id);
         orderService.cancel(id);
+        return Result.success();
+    }
+    @GetMapping("/reminder/{id}")
+    @ApiOperation("客户催单")
+    public Result reminder(@PathVariable Long id){
+        orderService.reminder(id);
         return Result.success();
     }
 }
