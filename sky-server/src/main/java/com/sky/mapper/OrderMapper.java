@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Select;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface OrderMapper {
@@ -36,4 +37,6 @@ public interface OrderMapper {
     Integer countByStatus(Integer status);
     @Select("select * from sky_take_out.orders where status=#{status} and order_time<#{orderTime}")
     List<Orders> getStatusAndOrderTime(Integer status, LocalDateTime orderTime);
+
+    Double sumByMap(Map map);
 }
